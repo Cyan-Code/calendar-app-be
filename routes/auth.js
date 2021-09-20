@@ -4,13 +4,42 @@
  */
 
 const {Router} = require('express');
-
 const router = Router();
 
-router.get('/', (req, res) => {
-  res.json({
-    ok: true
-  })
-})
+const { validarCampos } = require('../middlewares/validar-campos') 
+
+const {check} = require('express-validator')
+
+
+const {
+  crearUsuario,
+  loginUsuario,
+  revalidarToken
+} = require('../controlers/auth')
+
+
+router.post(
+  '/new',
+  [ // Middelwares
+    check('name', 'El nombre es obligatorio').not().isEmpty(),
+    check('email', 'El email es obligatorio').isEmail(),
+    check('password', 'El password debe tener 6 caracteres o mas').isLength({min:6}),
+    validarCampos
+  ],
+  crearUsuario)
+
+router.post('/', [
+  check('email', 'El email es obligatorio').isEmail(),
+  check('password', 'El password debe tener 6 caracteres o mas').isStrongPassword(),
+  validarCampos
+], loginUsuario)
+
+router.get('/renew', revalidarToken)
+
+
+
+
+
+
 
 module.exports = router
