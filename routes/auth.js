@@ -32,7 +32,7 @@ router.post('/', [
   validarCampos
 ], loginUsuario)
 
-router.get('/renew', validarJWT ,revalidarToken)
+router.get('/renew', validarJWT , revalidarToken)
 
 
 
