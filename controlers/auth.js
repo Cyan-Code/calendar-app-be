@@ -1,6 +1,7 @@
 const {response} = require('express')
 const bcrypt = require('bcryptjs')
 const Usuario = require('../models/Usuario')
+const { generarJWT } = require('../helpers/jwt')
 
 // funciones que definen el comportamiento segun las rutas de acceso
 const crearUsuario = async (req, res = response) => {
@@ -23,10 +24,14 @@ const crearUsuario = async (req, res = response) => {
     usuario.password = bcrypt.hashSync(password, salt);
 
     await usuario.save()
+    //Generar JWT
+    const token = await generarJWT(usuario.id, usuario.name)
+
     return res.status(201).json({
       ok: true,
       uid: usuario.id,
-      name: usuario.name
+      name: usuario.name,
+      token
     })
 
   } catch(e) {
@@ -58,10 +63,13 @@ const loginUsuario = async ( req, res = response) => {
       })
     }
     // Generacion del TOKEN
+    const token = await generarJWT(usuario.id, usuario.name)
+
     return res.json({
       ok: true,
       uid: usuario.id,
-      name: usuario.name
+      name: usuario.name,
+      token
     })
 
   }catch(e){
@@ -74,10 +82,16 @@ const loginUsuario = async ( req, res = response) => {
 
 }
 
-const revalidarToken = ( req, res = response) => {
+const revalidarToken = async ( req, res = response) => {
+
+  const {uid,name} = req
+
+  // Generacion del TOKEN
+  const token = await generarJWT(uid, name)
+
   res.json({
     ok: true,
-    msg: 'renew'
+    token
   })
 }
 
